@@ -1941,7 +1941,7 @@ else:
                                 key=f"rt_manual_idx_row_{k}",
                                 label_visibility="collapsed"
                             )
-                            cam_val = int(cam_idx_val)
+                            cam_val = cam_idx_val
                             cam_name_display = f"Webcam (Índice {cam_val})"
                         else:
                             found_cam = next((c for c in detected_cams if c["label"] == selected_cam_label), None)
@@ -2194,7 +2194,7 @@ else:
                             atk_id_val = str(getattr(multicam_eval, "attacker_id", "") or yuko.get("attacker_id", "KENSHI_AKA")).upper()
 
                             # Atualizar contador de pontos da sessão em tempo real
-                            if "SHIRO" in atk_id_val or "BRANCO" in str(atk_name).upper():
+                            if "SHIRO" in atk_id_val or "BRANCO" in atk_name.upper():
                                 total_shiro_strikes += 1
                                 if is_ippon:
                                     score_shiro += 1

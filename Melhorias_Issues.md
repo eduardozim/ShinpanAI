@@ -7,9 +7,11 @@ A versão final do **SenpAI** será organizada em **3 Nodos / Modos Principais d
 1. **Modo de Detecção em Tempo Real**
 
 2. **Modo de Detecção Gravada**
-   
+   - **Exportar resultados**: Permitir exportar resultado para Excel com relacionamento com link de vídeo de streamming
+   - **Importar revisões**: Permitir a importação de revisão feita em arquivo exportado e editado.
+
 3. **Modo de Treinamento & Aprendizado**
-.
+  - **Treinamento em tempo real**: Permitir analise do treinamento em tempo real
 
 ---
 
@@ -26,6 +28,7 @@ A versão final do **SenpAI** será organizada em **3 Nodos / Modos Principais d
 - **Estabilização e Correção de Imagem**: Corrigir tremores, distorção de lente, contraste e baixa iluminação.
 - **Sincronização Multicâmera**: Alinhar automaticamente transmissões por timestamp, áudio ou evento visual.
 - **Detecção de Câmera Inadequada**: Alertar quando o ângulo não permitir avaliar corretamente determinado critério técnico.
+- **Utilização de DLSS para processamento e renderização de vídeo em tempo real**: Utilizar a geração de frames via inteligência artificial para melhorar a qualidade do vídeo e de captação dos golpes.
 
 ### 3. Avaliação Técnica e Regras (Modo Live & Geral)
 - **Detecção de Área e Limites do Shiai-jo**: Identificar saídas de quadra, posição relativa dos atletas e eventos próximos às bordas.
@@ -84,6 +87,40 @@ A versão final do **SenpAI** será organizada em **3 Nodos / Modos Principais d
 - **Interface & Preferências**: Opções visuais e de exibição do dashboard.
 - **Testes Automatizados**: Expansão contínua da cobertura de testes unitários, de integração e e2e da aplicação.
 
+#### 11. Licenciamento e proteção do Ambiente
+- **Licenciamento**: Implementação de sistema de licenciamento.
+- **Marca d'água no código**: Inclusão de marca d'água no código fonte.
+- **Anti-Violação** Proteção contra cópia do código fonte.
+- **Anti-Tampering**: Proteção contra adulteração do código fonte.
+- **Marca d'agua nos vídeos**: Proteção de vídeos gerados com dados de identificação de movimentação.
+
+### 12. Arquitetura
+- **Modularização da Aplicação**: Transformar o código atual em módulos (Monolito -> Microserviços).
+- **Padronização de Protocolos de Comunicação**: Padronizar os protocolos de comunicação entre os módulos.
+- **Observabilidade**: Implementar sistema de monitoramento.
+- **Otimização de Performance**: Otimizar o código para melhor performance.
+- **Otimização de Memória**: Otimizar o código para melhor gerenciamento de memória.
+- **Otimização de Bateria**: Otimizar o código para melhor gerenciamento de bateria.
+
+### 13. Integrações
+- **Integração com Sistemas de Federações**: Integração com sistemas de federações para obtenção de dados de atletas e eventos.
+- **Integração com Sistemas de Arbitragem**: Integração com sistemas de arbitragem para obtenção de dados de árbitros e eventos.
+- **Integração com Sistemas de Treinamento**: Integração com sistemas de treinamento para obtenção de dados de atletas e eventos.
+- **Integração com Sistemas de Arbitragem**: Integração com sistemas de arbitragem para obtenção de dados de árbitros e eventos.
+
+### 14. Controle de usuários 
+- **Cadastro de usuários**: Implementação de sistema de cadastro de usuários.
+- **Cadastro de Academias**: Implementação de sistema de cadastro de Confederações, Federações, Ligas e academias.
+- **Cadastro de Atletas**: Implementação de sistema de cadastro de atletas.
+- **Cadastro de Árbitros**: Implementação de sistema de cadastro de árbitros.
+- **Cadastro de Instrutores**: Implementação de sistema de cadastro de instrutores.
+- **Cadastro de novos Kendocas**: Filiação de novos Kendocas para treinamentos remotamente ou na acabemia mais próxima por dados de GPS.
+- **Edição de usuários**: Implementação de sistema de edição de usuários.
+- **Exclusão de usuários**: Implementação de sistema de exclusão de usuários.
+- **Controle de acessos**: Implementação de sistema de controle de acessos.
+- **Controle de permissões**: Implementação de sistema de controle de permissões.
+- 
+
 ---
 
 ## 🐛 Issues & Bugs Conhecidos
@@ -102,6 +139,7 @@ A versão final do **SenpAI** será organizada em **3 Nodos / Modos Principais d
 - **Rastreamento de Atletas & Plano de Fundo**:
 
   - Falha na persistência ou troca acidental de identidade entre os Kenshi Aka e Shiro durante a luta.
+  - Falha na detecção de elementos de distorção da detecção (Shinpan, Expectadores estáticos ou transitando na frente das cameras, movimentação da camera, etc.)
 
 ---
 
@@ -117,6 +155,7 @@ O **SenpAI Mobile** foi concebido como uma extensão portátil e interativa do e
 
 ### 2. Treinamento Individual & Assistente Pessoal ("Pocket Sensei")
 - **Feedback em Tempo Real por Áudio (Bluetooth)**: Instruções e correções instantâneas por voz diretamente no fone de ouvido durante treinos solo de *Suburi* e *Uchikomi* (ex: *"Aumente o Zanshin"*, *"Sincronize o Fumikomi"*, *"Men detectado com 92% de precisão"*).
+- **Feedback do Sensei**: Envio do treinamento gravado para o Sensei responsável e obtenção de feedback por voz ou texto.
 - **Metrônomo Biomecânico & Contador de Suburi**: Monitoramento de cadência rítmica, altura de elevação do *Shinai* e consistência de postura com contagem automática de repetições.
 - **Acesso Completo às Rotinas Propostas de Treino**: Planos de treino personalizados gerados pelo motor de IA com metas diárias, séries recomendadas e vídeos tutoriais de referência técnica.
 - **Simulador Interativo de Exames de Graduação (Kyu/Dan)**: Checklist diagnóstico pré-exame com avaliação de postura, rituais de cortesia (*Reiho*), *Kihon* e conformidade biomecânica para cada nível.
