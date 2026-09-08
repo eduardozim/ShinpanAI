@@ -13,6 +13,10 @@ import datetime
 import warnings
 import html
 
+# Garante a remoção da restrição de tamanho de upload no Streamlit (50 GB / 51200 MB)
+os.environ["STREAMLIT_SERVER_MAX_UPLOAD_SIZE"] = "51200"
+os.environ["STREAMLIT_SERVER_MAX_MESSAGE_SIZE"] = "51200"
+
 # Suprime aviso benigno interno de depreciação do protobuf com mediapipe
 warnings.filterwarnings("ignore", category=UserWarning, module="google.protobuf")
 
@@ -2381,7 +2385,7 @@ else:
                     uploaded_file = st.file_uploader(
                         "Vídeo de Treinamento (.mp4, .avi, .mov)" if app_mode == "training" else "Vídeo da Luta (.mp4, .avi, .mov)",
                         type=["mp4", "avi", "mov"],
-                        help="Suporta arquivos de vídeo de qualquer tamanho. Arquivos acima de 200MB podem ter tempos de carregamento extensos.",
+                        help="Suporta arquivos de vídeo nos formatos .mp4, .avi ou .mov.",
                         key="recorded_local_file_uploader"
                     )
                     if uploaded_file is not None:
@@ -2431,6 +2435,22 @@ else:
                             st.session_state["video_source_type"] = "upload"
                             st.session_state.pop("youtube_video_info", None)
                             st.session_state.pop("youtube_url", None)
+
+                        # Exibe card visual confirmando o carregamento do vídeo
+                        sz_bytes = getattr(uploaded_file, "size", 0)
+                        if sz_bytes < 1024 * 1024:
+                            sz_formatted = f"{sz_bytes / 1024:.1f} KB"
+                        elif sz_bytes < 1024 * 1024 * 1024:
+                            sz_formatted = f"{sz_bytes / (1024 * 1024):.1f} MB"
+                        else:
+                            sz_formatted = f"{sz_bytes / (1024 * 1024 * 1024):.2f} GB"
+
+                        st.markdown(
+                            f'<div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 0.84rem; color: #4ade80;">'
+                            f'📁 <b>Vídeo Carregado:</b> <code>{html.escape(uploaded_file.name)}</code> &nbsp;|&nbsp; 💾 <b>Tamanho:</b> {sz_formatted}'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
                     else:
                         if st.session_state.get("video_source_type") == "upload":
                             if "uploaded_file_name" in st.session_state:

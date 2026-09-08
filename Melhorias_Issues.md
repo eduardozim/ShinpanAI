@@ -9,9 +9,11 @@ A versão final do **SenpAI** será organizada em **3 Nodos / Modos Principais d
 2. **Modo de Detecção Gravada**
    - **Exportar resultados**: Permitir exportar resultado para Excel com relacionamento com link de vídeo de streamming
    - **Importar revisões**: Permitir a importação de revisão feita em arquivo exportado e editado.
+   - **Upload Sem Restrição de Tamanho**: Suporte a arquivos de vídeo de grande porte (Full HD/4K, sem limite de 200MB).
 
 3. **Modo de Treinamento & Aprendizado**
   - **Treinamento em tempo real**: Permitir analise do treinamento em tempo real
+  - **Upload Sem Restrição de Tamanho**: Suporte a uploads de vídeos locais longos de keiko e exames sem limite de tamanho.
 
 ---
 

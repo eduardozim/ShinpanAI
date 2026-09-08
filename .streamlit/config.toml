@@ -1,0 +1,9 @@
+[server]
+# Remoção da restrição de tamanho de arquivo de upload no SenpAI (permite vídeos de alta resolução de até 50 GB)
+maxUploadSize = 51200
+maxMessageSize = 51200
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+gatherUsageStats = false

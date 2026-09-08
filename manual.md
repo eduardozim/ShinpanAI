@@ -120,6 +120,8 @@ A estrutura de arquivos do projeto está organizada de forma modular:
 
 ```text
 Dev/
+├── .streamlit/
+│   └── config.toml                 # Configurações do servidor Streamlit (remoção de limite de upload de vídeo)
 ├── config/
 │   ├── calibration_profiles.json   # Configurações e pesos dos perfis de calibração
 │   ├── settings.json               # Configurações globais do sistema (CPU/GPU)
