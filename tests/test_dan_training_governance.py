@@ -188,5 +188,34 @@ class TestDanTrainingGovernance(unittest.TestCase):
         self.assertEqual(self.mgr.get_training_metrics()["total_trainings_count"], 1)
         self.assertEqual(self.mgr.get_training_metrics()["average_dan_level"], 5.0)
 
+    def test_get_training_storage_info(self):
+        """Valida o cálculo do espaço em disco ocupado pelos dados de treinamento, modelos e configurações."""
+        # Salvar um item para garantir que os arquivos tenham conteúdo
+        self.mgr.save_feedback("match_storage.mp4", "normal", "ev_st", "TP", strike_type="MEN", reviewer_dan=4)
+
+        storage_info = self.mgr.get_training_storage_info()
+
+        self.assertIn("total_bytes", storage_info)
+        self.assertIn("total_formatted", storage_info)
+        self.assertIn("categories", storage_info)
+        self.assertIn("files", storage_info)
+
+        self.assertGreater(storage_info["total_bytes"], 0)
+        self.assertTrue(any(unit in storage_info["total_formatted"] for unit in ["B", "KB", "MB", "GB"]))
+
+        categories = storage_info["categories"]
+        self.assertIn("datasets", categories)
+        self.assertIn("models", categories)
+        self.assertIn("knowledge_config", categories)
+
+        self.assertGreater(categories["datasets"]["bytes"], 0)
+        self.assertIn("B", categories["datasets"]["formatted"])
+
+        # Verificar se as métricas de governança também incluem storage_info
+        metrics = self.mgr.get_training_metrics()
+        self.assertIn("storage_info", metrics)
+        self.assertEqual(metrics["storage_info"]["total_bytes"], storage_info["total_bytes"])
+
 if __name__ == "__main__":
     unittest.main()
+

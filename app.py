@@ -894,11 +894,82 @@ if nav_page == "settings":
         st.caption("Acompanhe as métricas globais de retreinamento do modelo, distribuição por graduação Dan e gerencie os dados de revisão.")
 
         training_metrics = feedback_mgr.get_training_metrics()
+        storage_info = training_metrics.get("storage_info", feedback_mgr.get_training_storage_info())
 
-        m_col1, m_col2, m_col3 = st.columns(3)
+        m_col1, m_col2, m_col3, m_col4 = st.columns(4)
         m_col1.metric("Total de Treinamentos Realizados", training_metrics["total_trainings_count"])
         m_col2.metric("Nível Médio (Dan) dos Treinamentos", training_metrics["average_dan_label"])
         m_col3.metric("Total de Marcações de Revisão", training_metrics["total_review_items"])
+        m_col4.metric(
+            "Espaço em Disco do Treinamento",
+            storage_info["total_formatted"],
+            help="Espaço total em disco ocupado pelos dados de feedback, histórico de retreinamento, modelos neurais e base de conhecimento da IA."
+        )
+
+        # ----------------------------------------------------------------------
+        # DETALHAMENTO DO ESPAÇO EM DISCO OCUPADO PELO TREINAMENTO
+        # ----------------------------------------------------------------------
+        st.markdown("#### 💾 Ocupação de Espaço em Disco do Treinamento:")
+        with st.container(border=True):
+            st.markdown(
+                '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">'
+                '<div style="display: flex; align-items: center; gap: 8px;">'
+                '<span style="font-size: 1.25rem;">💾</span>'
+                '<span style="font-weight: 700; font-size: 1.05rem; color: #F8FAFC;">Armazenamento Consolidado do Sistema de Treinamento</span>'
+                '</div>'
+                f'<span style="background: rgba(99, 102, 241, 0.2); color: #C7D2FE; border: 1px solid rgba(99, 102, 241, 0.4); font-size: 0.88rem; font-weight: 700; padding: 4px 14px; border-radius: 9999px;">Total em Disco: {storage_info["total_formatted"]}</span>'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+            cat_d = storage_info["categories"].get("datasets", {})
+            cat_m = storage_info["categories"].get("models", {})
+            cat_k = storage_info["categories"].get("knowledge_config", {})
+
+            sc_col1, sc_col2, sc_col3 = st.columns(3)
+            with sc_col1:
+                st.markdown(
+                    f'<div style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 12px 14px; min-height: 115px;">'
+                    f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">'
+                    f'<span style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em;">📂 Datasets & Histórico</span>'
+                    f'<span style="font-size: 1.15rem; font-weight: 700; color: #38BDF8;">{cat_d.get("formatted", "0 B")}</span>'
+                    f'</div>'
+                    f'<div style="font-size: 0.82rem; color: #CBD5E1; font-weight: 500;">Pasta: <code>{cat_d.get("folder", "data/")}</code></div>'
+                    f'<div style="font-size: 0.74rem; color: #94A3B8; margin-top: 4px;">{cat_d.get("description", "")}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+            with sc_col2:
+                st.markdown(
+                    f'<div style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(129, 140, 248, 0.35); border-radius: 10px; padding: 12px 14px; min-height: 115px;">'
+                    f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">'
+                    f'<span style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em;">🧠 Modelos de IA & Pesos</span>'
+                    f'<span style="font-size: 1.15rem; font-weight: 700; color: #818CF8;">{cat_m.get("formatted", "0 B")}</span>'
+                    f'</div>'
+                    f'<div style="font-size: 0.82rem; color: #CBD5E1; font-weight: 500;">Pasta: <code>{cat_m.get("folder", "models/")}</code></div>'
+                    f'<div style="font-size: 0.74rem; color: #94A3B8; margin-top: 4px;">{cat_m.get("description", "")}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+            with sc_col3:
+                st.markdown(
+                    f'<div style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(52, 211, 153, 0.35); border-radius: 10px; padding: 12px 14px; min-height: 115px;">'
+                    f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">'
+                    f'<span style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em;">⚙️ Conhecimento & Calibração</span>'
+                    f'<span style="font-size: 1.15rem; font-weight: 700; color: #34D399;">{cat_k.get("formatted", "0 B")}</span>'
+                    f'</div>'
+                    f'<div style="font-size: 0.82rem; color: #CBD5E1; font-weight: 500;">Pasta: <code>{cat_k.get("folder", "config/")}</code></div>'
+                    f'<div style="font-size: 0.74rem; color: #94A3B8; margin-top: 4px;">{cat_k.get("description", "")}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+
+            with st.expander("🔍 Ver arquivos detalhados e caminhos físicos no disco", expanded=False):
+                files_table_md = "| Arquivo | Localização / Caminho | Categoria | Tamanho em Disco | Status |\n| :--- | :--- | :--- | :---: | :---: |\n"
+                for f_item in storage_info["files"]:
+                    status_badge = "🟢 Ativo no Disco" if f_item.get("exists", True) else "⚪ Não inicializado"
+                    files_table_md += f"| `{f_item['name']}` | `{f_item['path']}` | {f_item['category']} | **{f_item['formatted']}** | {status_badge} |\n"
+                st.markdown(files_table_md)
 
         st.markdown("#### 📊 Distribuição de Treinamentos por Graduação Dan:")
         dan_table_md = "| Dan | Nome da Graduação | Quantidade de Treinamentos | Percentual (%) |\n| :--- | :--- | :---: | :---: |\n"

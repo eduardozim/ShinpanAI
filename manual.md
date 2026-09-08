@@ -301,6 +301,10 @@ Gerencia o ciclo completo de auditoria, revisão por Dan e otimização adaptati
   - Contador total de treinamentos realizados (separando sessões de revisores humanos e treinamentos automatizados por IA).
   - Nível médio (Dan) dos treinamentos humanos (1º ao 8º Dan), garantindo que os treinamentos automáticos de IA não sejam contabilizados como 8º Dan nem distorçam a média dos árbitros humanos.
   - Tabela de distribuição da quantidade de treinamentos e percentual por Dan (1º a 8º Dan) + **linha dedicada para Treinamentos Automatizados (IA / Web & Vídeo)**.
+- **Espaço em Disco do Treinamento & Modelos (`get_training_storage_info()`)**:
+  - Medição em tempo real do espaço em disco ocupado pelo ecossistema de treinamento do sistema.
+  - Discriminação detalhada por categoria: **Datasets & Histórico** (`data/`), **Modelos de IA & Pesos Neurais** (`models/`, ex: YOLOv8-Pose) e **Memória de Conhecimento & Calibração** (`config/`).
+  - Painel com cards visuais e listagem expansível com caminhos físicos, status e tamanho de cada arquivo no disco.
 - **Pacotes de Treinamento (Exportação e Importação)**:
   - `export_training_package()`: Exporta um arquivo `.json` contendo todas as marcações com o Dan do revisor e as datas dos treinamentos realizados.
   - `import_training_package()`: Importa arquivos `.json` previamente baixados, mesclando dados e recalibrando o modelo automaticamente.

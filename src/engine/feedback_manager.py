@@ -49,11 +49,15 @@ class FeedbackManager:
         self,
         dataset_path: str = "data/feedback_dataset.json",
         history_path: str = "data/training_history.json",
-        profiles_path: str = "config/calibration_profiles.json"
+        profiles_path: str = "config/calibration_profiles.json",
+        models_dir: str = "models",
+        knowledge_base_path: str = "config/ai_knowledge_base.json"
     ):
         self.dataset_path = dataset_path
         self.history_path = history_path
         self.profiles_path = profiles_path
+        self.models_dir = models_dir
+        self.knowledge_base_path = knowledge_base_path
         self._ensure_files_exist()
 
     def _ensure_files_exist(self):
@@ -304,6 +308,8 @@ class FeedbackManager:
             "Percentual (%)": f"{auto_pct}%"
         })
 
+        storage_info = self.get_training_storage_info()
+
         return {
             "total_trainings_count": total_trainings,
             "human_trainings_count": human_weight_count,
@@ -311,7 +317,205 @@ class FeedbackManager:
             "average_dan_level": avg_dan_round,
             "average_dan_label": avg_dan_label,
             "total_review_items": len(data),
-            "dan_distribution": table_data
+            "dan_distribution": table_data,
+            "storage_info": storage_info
+        }
+
+    @staticmethod
+    def _format_bytes(size_bytes: int) -> str:
+        """Formata uma quantidade de bytes em string legível (B, KB, MB, GB)."""
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        elif size_bytes < 1024 * 1024 * 1024:
+            return f"{size_bytes / (1024 * 1024):.2f} MB"
+        else:
+            return f"{size_bytes / (1024 * 1024 * 1024):.2f} GB"
+
+    def get_training_storage_info(
+        self,
+        models_dir: Optional[str] = None,
+        knowledge_base_path: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Calcula o espaço em disco ocupado atualmente pelo treinamento do sistema:
+        - Datasets de Feedback e Marcações de Revisão (data/feedback_dataset.json)
+        - Histórico de Treinamento e Sessões de Retreinamento (data/training_history.json)
+        - Pesos de Modelos de Rede Neural de IA (models/ e raiz, ex: yolov8n-pose.pt)
+        - Base de Conhecimento e Memória da IA (config/ai_knowledge_base.json)
+        - Perfis de Calibração e Aprendizado Biomecânico (config/calibration_profiles.json)
+
+        Retorna totais consolidados em bytes e formatados, métricas por categoria e arquivos detalhados.
+        """
+        target_models_dir = models_dir or getattr(self, "models_dir", "models")
+        target_kb_path = knowledge_base_path or getattr(self, "knowledge_base_path", "config/ai_knowledge_base.json")
+
+        files_detail: List[Dict[str, Any]] = []
+        datasets_bytes = 0
+        models_bytes = 0
+        knowledge_bytes = 0
+
+        # 1. Datasets & Histórico (data/)
+        dataset_paths = [self.dataset_path, self.history_path]
+        data_folder = os.path.dirname(self.dataset_path) or "data"
+        seen_paths = set()
+
+        for p in dataset_paths:
+            norm_p = os.path.normpath(p)
+            seen_paths.add(norm_p)
+            if os.path.exists(p):
+                sz = os.path.getsize(p)
+                datasets_bytes += sz
+                desc = "Dataset de Feedbacks & Marcações Dan" if p == self.dataset_path else "Histórico de Sessões de Retreinamento"
+                files_detail.append({
+                    "name": os.path.basename(p),
+                    "path": p.replace("\\", "/"),
+                    "category": "Datasets & Feedbacks",
+                    "category_key": "datasets",
+                    "bytes": sz,
+                    "formatted": self._format_bytes(sz),
+                    "description": desc,
+                    "exists": True
+                })
+            else:
+                files_detail.append({
+                    "name": os.path.basename(p),
+                    "path": p.replace("\\", "/"),
+                    "category": "Datasets & Feedbacks",
+                    "category_key": "datasets",
+                    "bytes": 0,
+                    "formatted": "0 B",
+                    "description": "Arquivo não inicializado",
+                    "exists": False
+                })
+
+        # Outros arquivos .json no diretório data (ex: backups, pacotes importados)
+        if os.path.isdir(data_folder):
+            try:
+                for fname in sorted(os.listdir(data_folder)):
+                    fpath = os.path.join(data_folder, fname)
+                    norm_f = os.path.normpath(fpath)
+                    if norm_f not in seen_paths and os.path.isfile(fpath) and fname.endswith(".json") and not fname.startswith("test_"):
+                        sz = os.path.getsize(fpath)
+                        datasets_bytes += sz
+                        seen_paths.add(norm_f)
+                        files_detail.append({
+                            "name": fname,
+                            "path": fpath.replace("\\", "/"),
+                            "category": "Datasets & Feedbacks",
+                            "category_key": "datasets",
+                            "bytes": sz,
+                            "formatted": self._format_bytes(sz),
+                            "description": "Dados adicionais / Pacote importado",
+                            "exists": True
+                        })
+            except Exception:
+                pass
+
+        # 2. Modelos de Rede Neural de IA (models/)
+        model_seen = set()
+        if os.path.isdir(target_models_dir):
+            try:
+                for fname in sorted(os.listdir(target_models_dir)):
+                    fpath = os.path.join(target_models_dir, fname)
+                    if os.path.isfile(fpath) and (
+                        fname.endswith(".pt") or fname.endswith(".onnx") or fname.endswith(".engine") or fname.endswith(".bin")
+                    ):
+                        sz = os.path.getsize(fpath)
+                        models_bytes += sz
+                        model_seen.add(fname)
+                        files_detail.append({
+                            "name": fname,
+                            "path": fpath.replace("\\", "/"),
+                            "category": "Modelos de IA & Pesos Neurais",
+                            "category_key": "models",
+                            "bytes": sz,
+                            "formatted": self._format_bytes(sz),
+                            "description": "Pesos Neurais YOLOv8-Pose (PyTorch CUDA/CPU)",
+                            "exists": True
+                        })
+            except Exception:
+                pass
+
+        # Se yolov8n-pose.pt estiver na raiz do projeto e ainda não contabilizado em models/
+        root_model = "yolov8n-pose.pt"
+        if "yolov8n-pose.pt" not in model_seen and os.path.isfile(root_model):
+            sz = os.path.getsize(root_model)
+            models_bytes += sz
+            files_detail.append({
+                "name": root_model,
+                "path": root_model,
+                "category": "Modelos de IA & Pesos Neurais",
+                "category_key": "models",
+                "bytes": sz,
+                "formatted": self._format_bytes(sz),
+                "description": "Pesos Neurais YOLOv8-Pose (Raiz)",
+                "exists": True
+            })
+
+        # 3. Base de Conhecimento & Perfis de Calibração (config/)
+        config_items = [
+            (self.profiles_path, "Perfis de Calibração Biomecânica", "calibration_profiles"),
+            (target_kb_path, "Base de Conhecimento e Memória do Auto-Trainer", "ai_knowledge_base")
+        ]
+        for p, desc, subkey in config_items:
+            if os.path.exists(p):
+                sz = os.path.getsize(p)
+                knowledge_bytes += sz
+                files_detail.append({
+                    "name": os.path.basename(p),
+                    "path": p.replace("\\", "/"),
+                    "category": "Conhecimento & Calibração da IA",
+                    "category_key": "knowledge_config",
+                    "bytes": sz,
+                    "formatted": self._format_bytes(sz),
+                    "description": desc,
+                    "exists": True
+                })
+            else:
+                files_detail.append({
+                    "name": os.path.basename(p),
+                    "path": p.replace("\\", "/"),
+                    "category": "Conhecimento & Calibração da IA",
+                    "category_key": "knowledge_config",
+                    "bytes": 0,
+                    "formatted": "0 B",
+                    "description": desc,
+                    "exists": False
+                })
+
+        total_bytes = datasets_bytes + models_bytes + knowledge_bytes
+
+        categories = {
+            "datasets": {
+                "name": "Datasets & Feedbacks",
+                "folder": (os.path.dirname(self.dataset_path) or "data").replace("\\", "/") + "/",
+                "bytes": datasets_bytes,
+                "formatted": self._format_bytes(datasets_bytes),
+                "description": "Anotações de Dan (TP/FP/FN), correções e histórico de retreinamento"
+            },
+            "models": {
+                "name": "Modelos de IA & Pesos Neurais",
+                "folder": target_models_dir.replace("\\", "/") + "/",
+                "bytes": models_bytes,
+                "formatted": self._format_bytes(models_bytes),
+                "description": "Pesos PyTorch / YOLOv8-Pose para rastreamento multi-person"
+            },
+            "knowledge_config": {
+                "name": "Conhecimento & Calibração",
+                "folder": (os.path.dirname(self.profiles_path) or "config").replace("\\", "/") + "/",
+                "bytes": knowledge_bytes,
+                "formatted": self._format_bytes(knowledge_bytes),
+                "description": "Memória técnica do Auto-Trainer (FIK/ZNKR) e perfis calibrados"
+            }
+        }
+
+        return {
+            "total_bytes": total_bytes,
+            "total_formatted": self._format_bytes(total_bytes),
+            "categories": categories,
+            "files": files_detail
         }
 
     def reset_all_training_data(self) -> None:

@@ -83,6 +83,7 @@ A versão final do **SenpAI** será organizada em **3 Nodos / Modos Principais d
 
 ### 10. Configurações Gerais do Sistema
 - **Calibração & Limiares**: Escolha e ajuste fino dos perfis de calibração e critérios técnicos.
+- **Armazenamento de Treinamento**: Monitoramento e diagnóstico em tempo real do espaço em disco ocupado pelos datasets de treinamento, histórico de sessões, pesos neurais de IA e bases de conhecimento.
 - **Câmeras & Rede**: Parâmetros de suporte ao protocolo RTCP/RTSP para múltiplas câmeras.
 - **Interface & Preferências**: Opções visuais e de exibição do dashboard.
 - **Testes Automatizados**: Expansão contínua da cobertura de testes unitários, de integração e e2e da aplicação.
