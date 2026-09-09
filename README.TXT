@@ -68,6 +68,11 @@ interpretador oficial assinado do Python, evitando bloqueios do Smart App Contro
 do Windows sobre o wrapper executável streamlit.exe.
 
 Recursos da Interface Web:
+- Página Inicial de Boas-Vindas (Home): Ao iniciar o sistema, uma tela inicial dedicada apresenta o SenpAI, os padrões oficiais FIK/AJKF, o status de hardware ativo e um demonstrativo passo a passo de como iniciar o uso em 4 etapas. A página é visível exclusivamente quando nem a página de Análise de Lutas nem a página de Menu de Configurações estiverem selecionadas.
+- Barra de Atalhos Rápidos na Home: Botões diretos para iniciar a Análise de Lutas, acessar as Configurações ou baixar a documentação oficial (manual.md).
+- Calibração Realista de Acurácia (< 50% de fábrica): O modelo inicia em uma faixa preliminar honesta (32% a 46%), eliminando falsos positivos e evoluindo progressivamente conforme manuais da FIK são processados e árbitros graduados registram correções.
+- Supressão de Falsos Positivos & Múltiplos Disparos: Elevação do cooldown de golpes para 35 frames (~1.2s), Non-Maximum Suppression (NMS) temporal e validação geométrica de Maai (contato entre combatentes), eliminando repetições e placares irreais (ex: 66 a 30 em lutas 1 a 1).
+- Persistência Incremental no Auto-Treinamento por IA: Consolidação contínua do conhecimento no início e término de cada treino, retomando sempre do último checkpoint e preservando todo o aprendizado prévio.
 - Interface otimizada e dimensionada (escala visual 90%) para visualização integrada e ergonômica.
 - Limpeza Automática de Análise na Transição de Modos: Ao alternar entre os Modos de Operação (Tempo Real, Detecção Gravada e Treinamento & Aprendizado), a análise anterior, revisões, arquivos carregados e workers em execução são limpos automaticamente para manter o ambiente pronto para uma nova análise.
 - Botão Manual de Limpeza e Nova Análise: Ação rápida "🧹 Nova Análise / Limpar" integrada no topo dos resultados gravados e de treinamento para reinicialização instantânea.
@@ -109,10 +114,10 @@ Para processar vídeos diretamente no terminal:
 - Otimizar perfil com base no dataset de feedback gravado:
    python main.py --profile normal --optimize-profile
 
-- Executar suíte completa de testes automatizados (81 testes) com relatório descritivo salvo em logs/:
+- Executar suíte completa de testes automatizados (116 testes) com relatório descritivo salvo em logs/:
    python run_tests.py
    (ou no Windows: .\.venv\Scripts\python.exe run_tests.py)
-   * Executa a suíte de 81 testes automatizados com 100% de aprovação
+   * Executa a suíte de 116 testes automatizados com 100% de aprovação
    * Gera o arquivo descritivo logs/senpai_test_report.log com detalhes de cada teste
    * Mantém estritamente apenas o último log de testes executado na pasta logs/
 
@@ -144,12 +149,24 @@ Opções disponíveis:
                           anotações gravadas em data/feedback_dataset.json.
 
 -------------------------------------------------------------------------------
-4. MODOS DE OPERAÇÃO
+4. MODOS DE OPERAÇÃO E NAVEGAÇÃO
 -------------------------------------------------------------------------------
+
+0. PÁGINA INICIAL / VISÃO GERAL (home):
+   Ponto de partida do sistema carregado na inicialização. Permanece visível
+   exclusivamente quando nem a Análise de Lutas nem o Menu de Configurações
+   estiverem selecionados. Apresenta:
+   - Visão geral institucional e conformidade com diretrizes da FIK e AJKF/ZNKR.
+   - Indicador de status de aceleração de hardware em tempo real (GPU NVIDIA CUDA / CPU).
+   - Demonstrativo passo a passo de como iniciar o uso em 4 etapas didáticas.
+   - Apresentação visual e comparativa dos 3 Modos Principais de Operação.
+   - Explicabilidade da Calibração Realista (< 50% na fase inicial) e governança por Dan.
+   - Atalhos diretos de ação rápida para Análise de Lutas, Configurações e download do manual.
 
 1. MODO DE DETECÇÃO GRAVADA (recorded):
    Análise biomecânica completa de combates gravados. Inclui detecção e delimitação
    temporal da luta por Sonkyō, pontuação ponderada de Yuko-Datotsu (Ki-Ken-Tai-Ichi),
+   validação geométrica de contato (Maai), eliminação de falsos positivos via NMS,
    placar eletrônico oficial (Aka vs Shiro com caracteres Katakana: メ, コ, ド, ツ),
    destaque de golpes pontuados na Linha do Tempo (メ MEN, コ KOTE, ド DO, ツ TSUKI),
    navegação interativa com salto calibrado de 1 segundo antes do evento, edição de
@@ -207,10 +224,11 @@ Opções disponíveis:
   Disponível na interface Web para ajuste manual de pesos e limiares via sliders.
 
 -------------------------------------------------------------------------------
-6. CRITÉRIOS AVALIADOS (KI-KEN-TAI-ICHI)
+6. CRITÉRIOS AVALIADOS (KI-KEN-TAI-ICHI & MAAI)
 -------------------------------------------------------------------------------
 
 - Alvo / Impacto (Ken): Precisão do impacto do Kensen na zona de ataque (Men, Kote, Do, Tsuki).
+- Contato e Distância (Maai): Proximidade física e alcance entre os combatentes no impacto (rejeição de golpes fora de alcance).
 - Fumikomi (Tai): Sincronismo entre o impacto do pé no solo e a aceleração dos pulsos.
 - Postura Corporal (Tai): Alinhamento da coluna e estabilidade no momento do golpe.
 - Zanshin (Ki): Manutenção da prontidão e postura nos frames após o impacto.

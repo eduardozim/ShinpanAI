@@ -725,6 +725,262 @@ if not venv_status["is_virtual_env"]:
         """
     )
 
+def render_welcome_home_page():
+    """
+    Renderiza a Página Inicial de Boas-Vindas do SenpAI:
+    - Informações básicas e objetivos da plataforma.
+    - Apresentação visual e conceitual dos 3 Modos de Operação.
+    - Demonstrativo passo a passo de como iniciar o uso.
+    - Atalhos diretos de ação e acesso a documentações oficiais.
+    """
+    saved_hw = get_processing_device()
+    dev_pref = st.session_state.get("device_preference", saved_hw)
+    effective_dev, dev_msg, dev_gpu = get_effective_device(dev_pref)
+
+    # 1. HERO BANNER DE BOAS-VINDAS
+    st.markdown(
+        f"""
+        <div style="background: linear-gradient(135deg, #090D16 0%, #1E1B4B 50%, #0F172A 100%); border: 2px solid #6366F1; border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(99, 102, 241, 0.25);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                        <span style="font-size: 38px;">⚔️</span>
+                        <div>
+                            <span style="color: #818CF8; font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">PLATAFORMA INTELIGENTE DE KENDO</span>
+                            <h1 style="color: #FFFFFF; font-size: 32px; font-weight: 900; margin: 0; padding: 0; line-height: 1.15; font-family: 'Segoe UI', system-ui, sans-serif;">
+                                SenpAI • <span style="color: #A5B4FC; font-weight: 700;">先輩 AI</span>
+                            </h1>
+                        </div>
+                    </div>
+                    <div style="color: #E2E8F0; font-size: 15px; font-weight: 500; margin-top: 6px; max-width: 840px; line-height: 1.5;">
+                        Sistema de Visão Computacional, Arbitragem Automatizada e Avaliação Biomecânica de <i>Yuko-Datotsu</i> e <i>Ki-Ken-Tai-Ichi</i> em estrita conformidade com as diretrizes da <b>FIK (International Kendo Federation)</b> e <b>AJKF/ZNKR</b>.
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <span style="background: rgba(99, 102, 241, 0.25); color: #C7D2FE; border: 1px solid #6366F1; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                        🏛️ FIK & AJKF Standards
+                    </span>
+                    <span style="background: rgba(34, 197, 94, 0.15); color: #4ADE80; border: 1px solid #22C55E; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                        ⚡ Hardware: {effective_dev.upper()} ({'GPU Ativa' if effective_dev == 'gpu' else 'CPU'})
+                    </span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # 2. BARRA DE ATALHOS RÁPIDOS DE INÍCIO
+    col_cta1, col_cta2, col_cta3 = st.columns([1.6, 1.6, 1.2])
+    with col_cta1:
+        if st.button("⚔️ Iniciar Análise de Lutas Agora", width="stretch", type="primary", key="home_btn_analysis"):
+            st.session_state["nav_page_selection"] = "analysis"
+            st.session_state["sidebar_nav_radio"] = "analysis"
+            st.rerun()
+    with col_cta2:
+        if st.button("⚙️ Abrir Menu de Configurações", width="stretch", key="home_btn_settings"):
+            st.session_state["nav_page_selection"] = "settings"
+            st.session_state["sidebar_nav_radio"] = "settings"
+            st.rerun()
+    with col_cta3:
+        man_doc = get_documentation_content("manual.md")
+        st.download_button("📖 Baixar Manual (.md)", data=man_doc, file_name="manual.md", mime="text/markdown", width="stretch", key="home_btn_dl_man")
+
+    st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+
+    # 3. DEMONSTRATIVO: COMO INICIAR O USO EM 4 PASSOS
+    st.markdown("### 🚀 Guia Rápido: Como Iniciar o Uso")
+    st.markdown("Siga o passo a passo abaixo para realizar sua primeira análise de combate ou treinamento no SenpAI:")
+
+    step_c1, step_c2, step_c3, step_c4 = st.columns(4)
+    with step_c1:
+        st.markdown(
+            """
+            <div style="background: #0F172A; border: 1.5px solid #334155; border-radius: 10px; padding: 16px; height: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="background: #3B82F6; color: #FFFFFF; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">1</span>
+                    <span style="font-size: 20px;">📌</span>
+                </div>
+                <div style="color: #F8FAFC; font-weight: 700; font-size: 14px; margin-bottom: 6px;">Navegação no Menu</div>
+                <div style="color: #94A3B8; font-size: 12px; line-height: 1.4;">
+                    No menu lateral à esquerda, selecione <b>⚔️ Análise de Lutas</b> para operar o sistema ou <b>⚙️ Configurações</b> para ajustar parâmetros.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with step_c2:
+        st.markdown(
+            """
+            <div style="background: #0F172A; border: 1.5px solid #334155; border-radius: 10px; padding: 16px; height: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="background: #6366F1; color: #FFFFFF; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">2</span>
+                    <span style="font-size: 20px;">🕹️</span>
+                </div>
+                <div style="color: #F8FAFC; font-weight: 700; font-size: 14px; margin-bottom: 6px;">Escolha do Modo</div>
+                <div style="color: #94A3B8; font-size: 12px; line-height: 1.4;">
+                    Escolha entre <b>🔴 Tempo Real</b>, <b>📹 Detecção Gravada</b> ou <b>🎓 Treinamento</b>, além do perfil de sensibilidade da arbitragem.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with step_c3:
+        st.markdown(
+            """
+            <div style="background: #0F172A; border: 1.5px solid #334155; border-radius: 10px; padding: 16px; height: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="background: #10B981; color: #FFFFFF; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">3</span>
+                    <span style="font-size: 20px;">📹</span>
+                </div>
+                <div style="color: #F8FAFC; font-weight: 700; font-size: 14px; margin-bottom: 6px;">Vídeo ou Câmera</div>
+                <div style="color: #94A3B8; font-size: 12px; line-height: 1.4;">
+                    Faça upload de vídeo local, insira link ou conecte câmeras. <i>Dica:</i> Use <b>"Gerar Vídeo Demonstrativo"</b> para testar em 3 segundos!
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with step_c4:
+        st.markdown(
+            """
+            <div style="background: #0F172A; border: 1.5px solid #334155; border-radius: 10px; padding: 16px; height: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="background: #F59E0B; color: #FFFFFF; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">4</span>
+                    <span style="font-size: 20px;">📊</span>
+                </div>
+                <div style="color: #F8FAFC; font-weight: 700; font-size: 14px; margin-bottom: 6px;">Diagnósticos & Exportação</div>
+                <div style="color: #94A3B8; font-size: 12px; line-height: 1.4;">
+                    Analise os golpes com HUD de Sonkyō, métricas de Ki-Ken-Tai-Ichi, faça revisões quadro a quadro e exporte relatórios em Excel/JSON.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("---")
+
+    # 4. OS 3 MODOS / NODOS PRINCIPAIS DE OPERAÇÃO
+    st.markdown("### 🥋 Os 3 Modos Principais de Operação do SenpAI")
+    st.markdown("O sistema foi arquitetado em três fluxos complementares para cobrir desde campeonatos oficiais até o aprendizado pedagógico no dojo:")
+
+    mode_c1, mode_c2, mode_c3 = st.columns(3)
+    with mode_c1:
+        st.markdown(
+            """
+            <div style="background: linear-gradient(180deg, #1E1B4B 0%, #0F172A 100%); border: 1.5px solid #4F46E5; border-radius: 12px; padding: 18px; height: 100%; box-shadow: 0 4px 16px rgba(79, 70, 229, 0.15);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 24px;">🔴</span>
+                    <div style="color: #FFFFFF; font-weight: 800; font-size: 16px;">Modo em Tempo Real</div>
+                </div>
+                <div style="color: #A5B4FC; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px;">Multi-Câmeras & Baixa Latência</div>
+                <div style="color: #CBD5E1; font-size: 12.5px; line-height: 1.5; margin-bottom: 12px;">
+                    Projetado para campeonatos e transmissão direta. Suporta até 4 fontes de vídeo simultâneas (Webcams, RTSP, Câmeras IP) com fusão geométrica de consenso entre ângulos para superar oclusões e pontos cegos.
+                </div>
+                <ul style="color: #94A3B8; font-size: 12px; margin: 0; padding-left: 18px; line-height: 1.5;">
+                    <li>Placar oficial instantâneo (Sanbon-Shobu)</li>
+                    <li>Reconexão automática e tolerância a falhas</li>
+                    <li>Notificações imediatas de golpes confirmados</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with mode_c2:
+        st.markdown(
+            """
+            <div style="background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); border: 1.5px solid #38BDF8; border-radius: 12px; padding: 18px; height: 100%; box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 24px;">📹</span>
+                    <div style="color: #FFFFFF; font-weight: 800; font-size: 16px;">Detecção Gravada</div>
+                </div>
+                <div style="color: #7DD3FC; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px;">Shiai Oficial & Arbitragem por IA</div>
+                <div style="color: #CBD5E1; font-size: 12.5px; line-height: 1.5; margin-bottom: 12px;">
+                    Análise aprofundada de arquivos de vídeo e transmissões gravadas (YouTube ou upload local sem restrição de tamanho). Delimita a luta estritamente entre o Sonkyō inicial e final.
+                </div>
+                <ul style="color: #94A3B8; font-size: 12px; margin: 0; padding-left: 18px; line-height: 1.5;">
+                    <li>Associação contínua de Kenshi Aka (Vermelho) e Shiro (Branco)</li>
+                    <li>Validação de contato físico (Maai) e Ki-Ken-Tai-Ichi</li>
+                    <li>Revisão quadro a quadro com anotações por Dan</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with mode_c3:
+        st.markdown(
+            """
+            <div style="background: linear-gradient(180deg, #064E3B 0%, #0F172A 100%); border: 1.5px solid #10B981; border-radius: 12px; padding: 18px; height: 100%; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 24px;">🎓</span>
+                    <div style="color: #FFFFFF; font-weight: 800; font-size: 16px;">Treinamento & Aprendizado</div>
+                </div>
+                <div style="color: #6EE7B7; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px;">Dojo, Keiko & Preparação para Exames</div>
+                <div style="color: #CBD5E1; font-size: 12.5px; line-height: 1.5; margin-bottom: 12px;">
+                    Focado na evolução técnica de praticantes e alunos. Suporta 14 modalidades oficiais de Kendo (Suburi, Kihon, Kata, Kirikaeshi, etc.) com acompanhamento individual de cada Kendoca presente.
+                </div>
+                <ul style="color: #94A3B8; font-size: 12px; margin: 0; padding-left: 18px; line-height: 1.5;">
+                    <li>Avaliação dos 3 Pilares (Movimentação, Precisão, Constância)</li>
+                    <li>Cadência rítmica (CPM) e desvio padrão de fadiga</li>
+                    <li>Exportação de relatórios diagnósticos individualizados</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("---")
+
+    # 5. INTELIGÊNCIA ARTIFICIAL, AUTO-TREINAMENTO E GOVERNANÇA
+    st.markdown("### 🧠 Inteligência Artificial Transparente & Governança por Dan")
+    info_col1, info_col2 = st.columns([1.5, 1.0])
+    with info_col1:
+        st.markdown(
+            """
+            <div style="background: #0B1120; border: 1px solid #334155; border-radius: 10px; padding: 16px 20px;">
+                <div style="color: #F8FAFC; font-weight: 700; font-size: 15px; margin-bottom: 6px;">
+                    🔬 Calibração Realista (< 50% na Fase Inicial)
+                </div>
+                <div style="color: #CBD5E1; font-size: 13px; line-height: 1.5; margin-bottom: 10px;">
+                    O SenpAI adota uma postura ética de honestidade empírica: modelos de visão computacional em estado bruto sem calibração prévia possuem acurácia preliminar em torno de <b>32% a 46%</b> devido à velocidade dos ataques e propensão a falsos positivos em combates dinâmicos.
+                </div>
+                <div style="color: #94A3B8; font-size: 12.5px; line-height: 1.45;">
+                    À medida que o <b>Treinador Automático por IA</b> processa manuais da FIK e que <b>árbitros graduados (1º ao 8º Dan)</b> cadastram revisões no dataset, a acurácia é refinada progressivamente, eliminando falsos positivos e ajustando limiares de impacto, <i>Fumikomi</i> e <i>Zanshin</i>.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with info_col2:
+        st.markdown(
+            """
+            <div style="background: #0B1120; border: 1px solid #334155; border-radius: 10px; padding: 16px 20px;">
+                <div style="color: #F8FAFC; font-weight: 700; font-size: 15px; margin-bottom: 6px;">
+                    🛡️ Governança e Regras Oficiais
+                </div>
+                <ul style="color: #CBD5E1; font-size: 12.5px; margin: 0; padding-left: 18px; line-height: 1.6;">
+                    <li><b>FIK Regulations</b> (Artigos 12 a 24)</li>
+                    <li><b>AJKF / ZNKR Shinpan Handbook</b></li>
+                    <li><b>Tratado de Nihon Kendo Kata</b></li>
+                    <li><b>Ponderação por Dan</b> (1º ao 8º Dan)</li>
+                    <li><b>Histórico auditável</b> de treinamentos</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+    f_col1, f_col2 = st.columns([2, 1])
+    with f_col1:
+        st.caption("🥋 *SenpAI • Desenvolvido para a comunidade de Kendo com rigor técnico, respeito ao Budo e tecnologia de ponta.*")
+    with f_col2:
+        if st.button("🚀 Ir para Análise de Lutas ➔", width="stretch", type="primary", key="home_bottom_cta"):
+            st.session_state["nav_page_selection"] = "analysis"
+            st.session_state["sidebar_nav_radio"] = "analysis"
+            st.rerun()
+
+
 # --- SIDEBAR: NAVEGAÇÃO PRINCIPAL ---
 st.sidebar.markdown("## 📌 Navegação")
 
@@ -748,16 +1004,56 @@ else:
         unsafe_allow_html=True
     )
 
+# Inicializar seleção da página com "home" como estado inicial padrão
+if "nav_page_selection" not in st.session_state:
+    st.session_state["nav_page_selection"] = "home"
+
+page_nav_options = ["home", "analysis", "settings"]
+current_nav_val = st.session_state.get("nav_page_selection", "home")
+if current_nav_val not in page_nav_options:
+    current_nav_val = "home"
+
+def on_sidebar_nav_change():
+    st.session_state["nav_page_selection"] = st.session_state.get("sidebar_nav_radio", "home")
+
 nav_page = st.sidebar.radio(
     "Selecione a Página",
-    options=["analysis", "settings"],
+    options=page_nav_options,
+    index=page_nav_options.index(current_nav_val),
+    key="sidebar_nav_radio",
+    on_change=on_sidebar_nav_change,
     format_func=lambda x: {
+        "home": "🏠 Início / Visão Geral",
         "analysis": "⚔️ Análise de Lutas",
         "settings": "⚙️ Menu de Configurações"
     }[x]
 )
+st.session_state["nav_page_selection"] = nav_page
 
-if nav_page == "settings":
+if nav_page == "home":
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🚀 Acesso Rápido")
+    st.sidebar.caption("Atalhos de navegação:")
+    if st.sidebar.button("⚔️ Ir para Análise de Lutas", width="stretch", key="sb_btn_home_to_analysis"):
+        st.session_state["nav_page_selection"] = "analysis"
+        st.session_state["sidebar_nav_radio"] = "analysis"
+        st.rerun()
+    if st.sidebar.button("⚙️ Ir para Configurações", width="stretch", key="sb_btn_home_to_settings"):
+        st.session_state["nav_page_selection"] = "settings"
+        st.session_state["sidebar_nav_radio"] = "settings"
+        st.rerun()
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 📚 Manuais do SenpAI")
+    sb_man_str = get_documentation_content("manual.md")
+    st.sidebar.download_button(
+        "📖 Baixar Manual (manual.md)",
+        data=sb_man_str,
+        file_name="manual.md",
+        mime="text/markdown",
+        width="stretch",
+        key="sb_dl_manual_home"
+    )
+elif nav_page == "settings":
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 📚 Documentação Rápida")
     st.sidebar.caption("Baixe ou consulte os manuais oficiais:")
@@ -784,9 +1080,15 @@ st.sidebar.markdown("---")
 
 
 # ==============================================================================
+# PÁGINA: BOAS-VINDAS / HOME INICIAL (VISÍVEL APENAS QUANDO NENHUMA OUTRA ESTIVER SELECIONADA)
+# ==============================================================================
+if nav_page == "home":
+    render_welcome_home_page()
+
+# ==============================================================================
 # PÁGINA 1: MENU DE CONFIGURAÇÕES (LAYOUT EM GUIAS / TABS)
 # ==============================================================================
-if nav_page == "settings":
+elif nav_page == "settings":
     st.header("⚙️ Configurações Gerais do Sistema")
     st.markdown("Gerencie os parâmetros de aceleração de hardware, governança de modelos, perfis de calibração, ferramentas de diagnóstico e consulte a documentação oficial.")
 
@@ -991,6 +1293,9 @@ if nav_page == "settings":
             if st.button("🗑️ Apagar Treinamento", type="secondary", width="stretch", key="btn_reset_train_tab"):
                 if confirm_reset:
                     feedback_mgr.reset_all_training_data()
+                    auto_trainer.reset_knowledge_base()
+                    if "last_auto_train_res" in st.session_state:
+                        del st.session_state["last_auto_train_res"]
                     st.success("✅ Treinamento do sistema apagado com sucesso! Sistema restaurado ao estágio inicial.")
                     st.rerun()
                 else:
@@ -1087,6 +1392,40 @@ if nav_page == "settings":
                 else:
                     effective_duration_min: float = float(sel_dur_opt)
 
+            # Indicador de Acurácia Atual Acumulada do Escopo Selecionado
+            scope_acc_data = auto_trainer.get_scope_current_accuracy(sel_scope_key)
+            c_acc = scope_acc_data["current_accuracy"]
+            b_acc = scope_acc_data["initial_baseline_accuracy"]
+            g_acc = scope_acc_data["gain_pct"]
+            s_count = scope_acc_data["sessions_count"]
+            tot_trains = scope_acc_data["total_system_auto_trainings"]
+
+            if s_count > 0:
+                acc_badge = f"<span style='background: rgba(16, 185, 129, 0.2); color: #34D399; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;'>🟢 Calibrado (+{g_acc:.1f}% em {s_count} treinos)</span>"
+            elif tot_trains > 0:
+                acc_badge = f"<span style='background: rgba(56, 189, 248, 0.2); color: #38BDF8; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;'>🔵 Em Calibração ({tot_trains} treinos globais)</span>"
+            else:
+                acc_badge = "<span style='background: rgba(245, 158, 11, 0.2); color: #FBBF24; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;'>⚠️ Fase Inicial (< 50% - Falsos Positivos)</span>"
+
+            bar_width_pct = min(100, max(0, int(c_acc)))
+            bar_color_gradient = "linear-gradient(90deg, #F59E0B, #EF4444)" if c_acc < 45.0 else ("linear-gradient(90deg, #38BDF8, #F59E0B)" if c_acc < 65.0 else "linear-gradient(90deg, #38BDF8, #4ADE80)")
+            st.markdown(
+                f"""
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 10px 14px; margin-top: 4px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.85rem; color: #E2E8F0; font-weight: 600;">
+                            🎯 <b>Acurácia Atual Deste Escopo:</b> <span style="color: #38BDF8; font-weight: 800; font-family: monospace; font-size: 1.05rem;">{c_acc:.1f}%</span>
+                        </span>
+                        {acc_badge}
+                    </div>
+                    <div style="background: #334155; border-radius: 4px; height: 6px; overflow: hidden; width: 100%;">
+                        <div style="width: {bar_width_pct}%; background: {bar_color_gradient}; height: 100%; border-radius: 4px;"></div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
             # Diagnóstico prévio em tempo real quando selecionado 'Necessidade Mais Latente'
             if sel_scope_key == "latent_need":
                 diag_info = auto_trainer.diagnose_latent_need()
@@ -1135,6 +1474,9 @@ if nav_page == "settings":
                     rem_s = data.get("remaining_seconds", 0.0)
                     elap_s = data.get("elapsed_seconds", 0.0)
                     acc_val = data.get("current_accuracy", 75.0)
+                    init_acc_val = data.get("initial_accuracy", 75.0)
+                    acc_gain = data.get("accuracy_gain", round(acc_val - init_acc_val, 1))
+                    gain_signal = f"+{acc_gain:.1f}%" if acc_gain >= 0 else f"{acc_gain:.1f}%"
                     samples = data.get("samples_processed", 0)
 
                     # Formatação de tempo decorrido e restante
@@ -1153,7 +1495,7 @@ if nav_page == "settings":
                         f"📊 **Progresso:** `{pct}%` &nbsp;|&nbsp; "
                         f"🔬 **Amostras Biomecânicas:** `{samples:,}`"
                     )
-                    metrics_placeholder.metric("🎯 Acurácia Biomecânica Estimada", f"{acc_val:.1f}%", f"+{acc_val - 75.0:.1f}%")
+                    metrics_placeholder.metric("🎯 Acurácia Biomecânica Estimada", f"{acc_val:.1f}%", gain_signal)
                     
                     recent_logs = data.get("logs", [])
                     if recent_logs:
@@ -1161,23 +1503,49 @@ if nav_page == "settings":
                         logs_placeholder.markdown(f"**Logs da Execução de IA:**\n{logs_md}")
 
                 with st.spinner("Conectando aos repositórios técnicos e executando mineração de conhecimento..."):
-                    train_res = auto_trainer.run_auto_training(
-                        scope_key=sel_scope_key,
-                        duration_minutes=effective_duration_min,
-                        intensity=depth_sel,
-                        include_video=inc_vid_chk,
-                        include_text_guidelines=inc_txt_chk,
-                        progress_callback=update_progress_ui
-                    )
+                    try:
+                        train_res = auto_trainer.run_auto_training(
+                            scope_key=sel_scope_key,
+                            duration_minutes=effective_duration_min,
+                            intensity=depth_sel,
+                            include_video=inc_vid_chk,
+                            include_text_guidelines=inc_txt_chk,
+                            progress_callback=update_progress_ui
+                        )
+                    except Exception as ex:
+                        auto_trainer.consolidate_pending_checkpoint()
+                        train_res = {
+                            "status": "interrupted_salvaged",
+                            "scope_name": AUTO_TRAINING_SCOPES.get(sel_scope_key, {}).get("name", sel_scope_key),
+                            "error_message": str(ex),
+                            "duration_seconds_actual": 0.0,
+                            "initial_accuracy_pct": 75.0,
+                            "final_accuracy_pct": 75.0,
+                            "accuracy_gain_pct": 0.0,
+                            "sources_consulted": [],
+                            "improvements_summary": ["Conhecimento e estado do treinamento salvos com segurança na Base de Conhecimento."],
+                            "training_logs": [f"⚠️ Interrupção: {ex}"]
+                        }
 
                 st.session_state["last_auto_train_res"] = train_res
-                st.toast(f"🎉 Treinamento Automático ({train_res['scope_name']}) concluído!", icon="🚀")
+                if train_res.get("status") == "interrupted_salvaged":
+                    st.toast("💾 Aprendizado salvo e consolidado com sucesso na Base de Conhecimento!", icon="🛡️")
+                else:
+                    st.toast(f"🎉 Treinamento Automático ({train_res['scope_name']}) concluído!", icon="🚀")
                 st.rerun()
 
             # Exibição dos resultados do último treinamento se disponível
             if "last_auto_train_res" in st.session_state:
                 last_res = st.session_state["last_auto_train_res"]
                 st.markdown("---")
+                if last_res.get("status") == "interrupted_salvaged":
+                    st.warning(
+                        f"🛡️ **Treinamento Interrompido & Aprendizado 100% Salvo:** "
+                        f"Ocorreu uma interrupção durante o ciclo, mas todo o conhecimento obtido "
+                        f"({len(last_res.get('sources_consulted', []))} fontes mineradas, "
+                        f"{last_res.get('samples_processed', 0)} amostras biomecânicas) "
+                        f"foi consolidado e gravado com segurança na Base de Conhecimento do SenpAI."
+                    )
                 st.markdown(f"#### 🎉 Resultado do Último Treinamento: **{last_res.get('scope_name', '')}**")
                 
                 r_c1, r_c2, r_c3, r_c4 = st.columns(4)
@@ -1773,7 +2141,7 @@ if nav_page == "settings":
 # ==============================================================================
 # PÁGINA 2: ANÁLISE DE LUTAS (PÁGINA PRINCIPAL)
 # ==============================================================================
-else:
+elif nav_page == "analysis":
     # --- SIDEBAR DA ANÁLISE: SELEÇÃO DOS 3 MODOS DE OPERAÇÃO ---
     st.sidebar.markdown("### 🕹️ Modo de Operação")
     app_mode_raw = st.sidebar.radio(
@@ -3883,6 +4251,10 @@ else:
                                         st.markdown("**Alterações da Calibração:**")
                                         for chg in session_rec["optimization_summary"]["changes"]:
                                             st.markdown(f"- {chg}")
+else:
+    # Estado inicial ou fallback se nenhuma página específica for selecionada
+    render_welcome_home_page()
+
 
 
 

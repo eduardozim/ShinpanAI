@@ -123,45 +123,61 @@ Dev/
 ├── .streamlit/
 │   └── config.toml                 # Configurações do servidor Streamlit (remoção de limite de upload de vídeo)
 ├── config/
+│   ├── ai_knowledge_base.json      # Base de conhecimento persistida e auto-treinamento de IA
 │   ├── calibration_profiles.json   # Configurações e pesos dos perfis de calibração
 │   ├── settings.json               # Configurações globais do sistema (CPU/GPU)
 │   └── sonkyo_learned_profile.json # Perfil adaptativo aprendido de postura de Sonkyō
 ├── data/
+│   ├── auto_training_checkpoint.json # Checkpoint persistente de tolerância a falhas do auto-treinador
 │   ├── feedback_dataset.json       # Base de dados de anotações (TP/FP/FN/Dan) para RL
 │   └── training_history.json       # Histórico de sessões de treinamento e revisões por Dan
 ├── logs/
-│   └── senpai_debug.log         # Arquivo consolidado de logs, erros e alertas do sistema
+│   ├── senpai_debug.log            # Arquivo consolidado de logs, erros e alertas do sistema
+│   └── senpai_test_report.log      # Relatório descritivo da última execução de testes automatizados
 ├── src/
 │   ├── analytics/
-│   │   ├── biomechanics.py         # Cálculo numérico dos critérios de Yuko-Datotsu
-│   │   ├── event_spotter.py        # Detecção temporal de picos cinemáticos e golpes
-│   │   └── sonkyo_detector.py      # Identificação de Sonkyō, delimitação da luta e aprendizado
+│   │   ├── biomechanics.py         # Cálculo numérico dos critérios de Yuko-Datotsu e Maai
+│   │   ├── event_spotter.py        # Detecção temporal de picos cinemáticos, debounce e NMS de golpes
+│   │   ├── multi_camera_fusion.py  # Fusão de consenso multi-câmeras e avaliação Yuko-Datotsu
+│   │   ├── sonkyo_detector.py      # Identificação de Sonkyō, delimitação da luta e aprendizado
+│   │   └── training_analyzer.py    # Análise das 14 modalidades de dojo e avaliação dos 3 Pilares
 │   ├── engine/
+│   │   ├── auto_trainer.py         # Motor de auto-treinamento por IA, persistência e baselines
 │   │   ├── calibrator.py           # Motor de pontuação e validação de limiares
 │   │   ├── feedback_manager.py     # Motor de Aprendizagem por Reforço, Governança por Dan e Otimização
 │   │   └── reporter.py             # Gerador de relatórios diagnósticos textuais
 │   ├── utils/
 │   │   ├── demo_generator.py       # Gerador sintético de vídeos de teste de Kendo
-│   │   ├── hardware.py             # Detecção de GPU NVIDIA e resolução de fallback CPU
+│   │   ├── environment.py          # Detecção e status de isolamento de ambiente virtual (.venv)
+│   │   ├── hardware.py             # Detecção de GPU NVIDIA CUDA e resolução de fallback CPU
 │   │   ├── logger_manager.py       # Gerenciador central de logs, alertas e diagnósticos de debug
 │   │   ├── settings_manager.py     # Gerenciamento e persistência das configurações do sistema
+│   │   ├── stream_capture.py       # Captura assíncrona otimizada para câmeras IP / RTSP / Webcams
+│   │   ├── test_runner.py          # Runner de testes automatizados com emissão de log descritivo
 │   │   └── video_downloader.py     # Download, extração de metadados e streaming do YouTube/Web
 │   ├── vision/
 │   │   ├── combatant_tracker.py    # Rastreamento dos 2 Kenshi (Aka/Shiro), flag dorsal e planos
 │   │   ├── pose_detector.py        # Rastreamento de esqueleto 3D via YOLOv8-Pose / MediaPipe
 │   │   └── shinai_tracker.py       # Estimação do Kensen e zonas anatômicas de alvo
-│   └── pipeline.py                 # Pipeline orquestrador end-to-end de vídeo e renderização
+│   └── pipeline.py                 # Pipeline orquestrador end-to-end de vídeo e validação de Maai
 ├── tests/
+│   ├── test_auto_trainer.py        # Testes de auto-treinamento, baselines < 50% e tolerância a falhas
 │   ├── test_dan_training_governance.py # Testes da governança por Dan, pacotes e retreinamento
+│   ├── test_environment.py         # Testes de detecção de ambiente virtual
 │   ├── test_feedback_loop.py       # Testes unitários para a malha de feedback e RL
 │   ├── test_hardware_settings.py   # Testes automatizados de hardware e configurações
 │   ├── test_logger_manager.py      # Testes automatizados do sistema de logs e diagnóstico
+│   ├── test_multi_camera_fusion.py # Testes de fusão multi-câmeras, quórum e consenso
 │   ├── test_pipeline_cancellation.py # Testes automatizados de cancelamento e interrupção do pipeline
+│   ├── test_pose_batch_processing.py # Testes de processamento em batch de poses
 │   ├── test_scoreboard_and_flag_detection.py # Testes do placar oficial e detecção de flag dorsal
 │   ├── test_sonkyo_and_plane_filtering.py # Testes de Sonkyō, limites da luta e filtragem de planos
+│   ├── test_stream_capture.py      # Testes de captura e normalização de streams
+│   ├── test_training_modes.py      # Testes das 14 modalidades de treino e 3 pilares
 │   └── test_video_downloader.py    # Testes unitários e de integração do downloader de YouTube
-├── app.py                          # Dashboard Web Interativo em Streamlit (com HUD, Placar e Configurações)
+├── app.py                          # Dashboard Web Interativo Streamlit (Home, Análise e Configurações)
 ├── main.py                         # Interface de Linha de Comando (CLI com flags completas)
+├── run_tests.py                    # Script raiz para execução descritiva dos testes automatizados
 ├── Melhorias_Issues.md             # Registro de pendências, issues e histórico de versões
 ├── README.TXT                      # Manual simplificado de uso rápido
 └── manual.md                       # Manual técnico completo e log de mudanças (este arquivo)
@@ -201,14 +217,17 @@ Classificador temporal (*Action Spotter*) que analisa as séries temporais de ve
 1. Fase de elevação (*Furikaburi*)
 2. Aceleração descendente rápida
 3. Instante exato de impacto (pico de desaceleração)
+- **Cooldown Estendido (35 frames / ~1.2s)**: O intervalo mínimo entre eventos (`min_event_gap_frames`) foi calibrado para evitar que a elevação e a descida do mesmo movimento gerem disparos redundantes.
+- **Supressão Temporal de Duplicatas (Non-Maximum Suppression - NMS)**: Aplica supressão temporal por combatente sobre candidatos a golpes vizinhos, retendo estritamente o instante de maior intensidade cinemática e descartando oscilações espúrias.
 
 #### `BiomechanicsAnalyzer` ([biomechanics.py](file:///d:/Projetos/SenpAI/Dev/src/analytics/biomechanics.py))
-Calcula quantitativamente os 4 pilares do **Ki-Ken-Tai-Ichi**:
+Calcula quantitativamente os 4 pilares do **Ki-Ken-Tai-Ichi** e a validação de contato (**Maai**):
 
 1. **Target Impact (Ken)**: Avalia a proximidade entre a ponta do *Kensen* e o centro da zona anatômica alvo no frame de impacto (Escala: $0\%$ a $100\%$).
 2. **Fumikomi Sync (Tai)**: Mede a diferença de tempo (offset em ms) entre a batida do pé direito no solo e o ponto de máxima desaceleração do golpe. Quanto menor o offset em relação à janela ideal ($0\text{ ms}$ a $40\text{ ms}$), maior a pontuação.
 3. **Posture (Tai)**: Calcula o alinhamento do vetor da coluna (ombro-quadril) em relação à vertical perfeita. Penaliza inclinações excessivas para a frente/lados e perda de estabilidade da cabeça.
 4. **Zanshin (Ki)**: Avalia a janela pós-golpe (15 frames após o impacto). Mede a manutenção da postura firme, estabilidade visual e ausência de desaceleração desordenada ou desequilíbrio.
+5. **Discriminação de Contato Físico (Maai / Distância de Combate)**: No instante do impacto, avalia a distância geométrica relativa entre os combatentes (Aka e Shiro). Golpes desferidos no vazio sem alcance real (> 0.48 de distância na quadra) são sumariamente reprovados com o diagnóstico `Fora do Maai (Sem contato com oponente)`.
 
 #### `SonkyoDetector` ([sonkyo_detector.py](file:///d:/Projetos/SenpAI/Dev/src/analytics/sonkyo_detector.py))
 Módulo biomecânico que monitora e reconhece o ritual sagrado de **Sonkyō** (agachamento sobre os calcanhares com coluna vertical):
@@ -327,13 +346,46 @@ Motor de inteligência artificial autônomo para busca, ingestão técnica e rec
   - Calibração dos limiares de *Yuko-Datotsu*, *Ki-Ken-Tai-Ichi* e *Sonkyō* para Lutas Gravadas (Shiai).
   - Otimização do quórum de consenso multi-câmeras e baixa latência para Detecção em Tempo Real.
   - Ajuste dos 3 Pilares (*Movimentação, Precisão e Constância*) nas 14 Modalidades Pedagógicas de Treinamento.
+- **Calibração Realista de Acurácia (< 50% de Fábrica)**:
+  - O sistema adota uma postura empírica transparente: modelos brutos de visão computacional sem calibração prévia possuem acurácia preliminar entre **32.0% e 46.5%** (sendo *Suburi* 46.5%, *Ji-Geiko* 32.0%, *recorded_shiai* 34.0% e *realtime_shiai* 35.0%).
+  - À medida que o auto-treinador processa manuais da FIK e que árbitros graduados registram anotações, a acurácia é refinada continuamente. Quando anotações reais de Shinpans existem, a precisão empírica real (`feedback_mgr.get_stats()["precision_pct"]`) substitui as baselines teóricas.
+  - **Faixas Visuais de Maturação**:
+    - `< 45.0%`: `Fase Inicial (Falsos Positivos)` (Badge Âmbar/Laranja com barra de progresso em tom quente).
+    - `45.0% - 65.0%`: `Em Calibração` (Badge Azul).
+    - `65.0% - 80.0%`: `Calibrado` (Badge Verde Menta).
+    - `>= 80.0%`: `Excelente / Shiai` (Badge Verde Esmeralda).
+- **Persistência Contínua, Checkpoints e Tolerância a Falhas (`auto_training_checkpoint.json`)**:
+  - **Consolidação Preventiva no Início**: Antes de iniciar um novo ciclo, qualquer aprendizado anterior pendente ou interrompido é automaticamente absorvido e consolidado na Base de Conhecimento.
+  - **Aprendizado Cumulativo Contínuo**: Novos treinamentos partem sempre da acurácia e parâmetros reais acumulados previamente, treinando pelo tempo total selecionado sem reiniciar do zero.
+  - **Persistência Atômica Periódica**: Checkpoints salvos a cada etapa e gravação direta incremental de novas fontes mineradas em disco.
+  - **Salvamento Garantido em Caso de Falhas (`interrupted_salvaged`)**: Caso ocorra qualquer erro inesperado durante a execução, todo o conhecimento, fontes mineradas e amostras biomecânicas obtidas até a fração de segundo da falha são imediatamente preservados e consolidados na Base de Conhecimento e no histórico de governança.
+  - **Preservação de Dados**: Nenhum treinamento realizado é descartado automaticamente, sendo limpo apenas quando o usuário aciona explicitamente a opção de reset nas Configurações.
 
 ---
 
 ### 4.6. Relatórios e Pipeline ([reporter.py](file:///d:/Projetos/SenpAI/Dev/src/engine/reporter.py) & [pipeline.py](file:///d:/Projetos/SenpAI/Dev/src/pipeline.py))
 
 - **`DiagnosticReporter`** ([reporter.py](file:///d:/Projetos/SenpAI/Dev/src/engine/reporter.py)): Gera um texto explicativo em Português detalhando por que o golpe foi aprovado ou reprovado, apresentando os milissegundos do Fumikomi e dicas de correção técnica para o praticante.
-- **`SenpAIPipeline`** ([pipeline.py](file:///d:/Projetos/SenpAI/Dev/src/pipeline.py)): Orquestra a execução frame-a-frame do vídeo, grava o vídeo anotado com esqueletos e alvos, e retorna o dicionário completo com métricas.
+- **`SenpAIPipeline`** ([pipeline.py](file:///d:/Projetos/SenpAI/Dev/src/pipeline.py)): Orquestra a execução frame-a-frame do vídeo, grava o vídeo anotado com esqueletos e alvos, valida distância física de contato (*Maai*) e retorna o dicionário completo com métricas.
+
+---
+
+### 4.7. Interface Web e Navegação Estrita (Página Inicial / Boas-Vindas) ([app.py](file:///d:/Projetos/SenpAI/Dev/app.py))
+
+A interface web conta com uma arquitetura de navegação com visibilidade estrita baseada no estado de seleção:
+
+- **Página Inicial de Abertura (`render_welcome_home_page`)**:
+  - Ponto de partida carregado automaticamente ao inicializar o sistema (`st.session_state["nav_page_selection"] = "home"`).
+  - **Regra Estrita de Visibilidade**: Esta página inicial **só é visível quando nem a página Análise de Lutas nem a página Menu de Configurações estiverem selecionadas**. Assim que o usuário escolhe qualquer outra página, a Home é completamente ocultada, deixando a interface limpa e focada.
+  - **Hero Banner Institucional**: Apresentação de conformidade com normas FIK (Artigos 12 a 24) e AJKF/ZNKR, com detecção em tempo real de hardware ativo (GPU NVIDIA CUDA com FP16 Tensor Cores ou CPU).
+  - **Barra de Atalhos de Ação Rápida**: Botões para transição imediata para a Análise de Lutas, acesso ao Menu de Configurações e download direto da documentação oficial (`manual.md`).
+  - **Guia Demonstrativo em 4 Passos (*Como Iniciar o Uso*)**:
+    1. *Navegação no Menu*: Orientações sobre a barra lateral.
+    2. *Escolha do Modo*: Seleção entre Tempo Real, Detecção Gravada e Treinamento.
+    3. *Vídeo ou Câmera*: Upload de arquivos locais, inserção de URLs ou geração de vídeo sintético de demonstração em 3 segundos.
+    4. *Diagnósticos & Exportação*: Como revisar os eventos no player, avaliar os critérios de *Ki-Ken-Tai-Ichi* e exportar dados em Excel/JSON.
+  - **Apresentação dos 3 Modos de Operação**: Detalhamento em cards estilizados do Modo em Tempo Real (multi-câmeras), Detecção Gravada (arbitragem oficial e rituais de Sonkyō) e Treinamento & Aprendizado (14 modalidades de dojo).
+  - **Transparência de Inteligência Artificial & Governança por Dan**: Esclarecimento didático sobre a calibração inicial realista (< 50%) e a governança com auditoria de árbitros (1º ao 8º Dan).
 
 ---
 
@@ -351,7 +403,7 @@ O projeto inclui suíte completa de testes automatizados em `unittest` com runne
 .\.venv\Scripts\python.exe -m unittest discover tests
 ```
 
-Também é possível disparar os testes diretamente no **Web Dashboard** acessando a aba **⚙️ Configurações > Seção 5 (Diagnóstico e Logs)** através do botão **`🔬 Rodar Testes (79)`** e baixar o relatório completo em **`📥 Baixar Log Testes (.log)`**.
+Também é possível disparar os testes diretamente no **Web Dashboard** acessando a aba **⚙️ Configurações > Seção 5 (Diagnóstico e Logs)** através do botão **`🔬 Rodar Testes`** e baixar o relatório completo em **`📥 Baixar Log Testes (.log)`**.
 
 ### Relatório Descritivo e Política de Retenção de Logs
 
@@ -362,21 +414,24 @@ Também é possível disparar os testes diretamente no **Web Dashboard** acessan
 - **Política de Retenção Única**:
   - A pasta `logs/` mantém **estritamente apenas o último log de testes executado**, sobrescrevendo ou limpando relatórios anteriores automaticamente a cada nova execução.
 
-### Módulos de Testes Incluídos (84 Testes)
+### Módulos de Testes Incluídos (116 Testes)
 
-- **`test_auto_trainer.py`**: Valida a inicialização da base de conhecimento de Kendo, diagnóstico autônomo de necessidade mais latente, ciclo de auto-treinamento com tempo controlado, recalibração de perfis de arbitragem e das 14 modalidades pedagógicas, persistência em governança com identificação de IA e cancelamento cooperativo.
-- **`test_dan_training_governance.py`**: Valida salvamento de revisões com Dan, retreinamento do modelo, cálculo das métricas Dan (contador humano vs IA, média de Dan humano e tabela por Dan com linha dedicada para IA), exportação/importação de pacotes `.json` com data e Dan, e reset do sistema.
-- **`test_feedback_loop.py`**: Valida salvamento, persistência, cálculo de precisão/recall e algoritmo de aprendizagem por reforço sobre Falsos Positivos.
-- **`test_hardware_settings.py`**: Valida detecção de GPU NVIDIA, configurações globais e resolução de fallback transparente para CPU.
-- **`test_logger_manager.py`**: Valida sistema de logs, métricas em tempo real e diagnósticos automatizados.
-- **`test_multi_camera_fusion.py`**: Valida o motor de consenso e fusão multi-câmeras, escalonamento de quórum por quantidade de câmeras ($N=1$ a $4$), rejeição de falsos positivos unilaterais, alinhamento temporal, fusão de scores e a presença da análise completa de Yūko-Datotsu (Ki-Ken-Tai-Ichi) para golpes Ippon e não-Ippon.
-- **`test_pipeline_cancellation.py`**: Valida cancelamento cooperativo, liberação de recursos de streaming e cronômetro em tempo real.
-- **`test_scoreboard_and_flag_detection.py`**: Valida o placar eletrônico Sanbon-shobu, detecção cromática de flag dorsal (Tasukuki) e inversão Aka ⇄ Shiro.
-- **`test_sonkyo_and_plane_filtering.py`**: Valida a classificação postural de Sonkyō, delimitação temporal da luta, filtragem de planos (fundo/transeuntes/árbitros em primeiro plano) e persistência de aprendizado de Sonkyō.
-- **`test_training_modes.py`**: Valida as 14 modalidades pedagógicas de treino, cálculo dos 3 Pilares (Movimentação, Precisão, Constância) e perfil do Kendoca.
-- **`test_video_downloader.py`**: Valida download, extração de metadados, validação de URLs do YouTube/Web e integração de streams com cache.
+- **`test_auto_trainer.py` (14 testes)**: Valida a inicialização da base de conhecimento de Kendo, diagnóstico autônomo de necessidade mais latente, ciclo de auto-treinamento com tempo controlado, baselines preliminares realistas (< 50%), recalibração de perfis de arbitragem e das 14 modalidades pedagógicas, persistência incremental em governança e checkpoints de tolerância a falhas.
+- **`test_dan_training_governance.py` (12 testes)**: Valida salvamento de revisões com Dan, retreinamento do modelo, cálculo das métricas Dan (contador humano vs IA, média de Dan humano e tabela por Dan com linha dedicada para IA), exportação/importação de pacotes `.json` com data e Dan, e reset do sistema.
+- **`test_environment.py` (4 testes)**: Valida detecção e integridade do ambiente virtual Python (`.venv`).
+- **`test_feedback_loop.py` (4 testes)**: Valida salvamento, persistência, cálculo de precisão/recall e algoritmo de aprendizagem por reforço sobre Falsos Positivos.
+- **`test_hardware_settings.py` (8 testes)**: Valida detecção de GPU NVIDIA CUDA, configurações globais e resolução de fallback transparente para CPU.
+- **`test_logger_manager.py` (6 testes)**: Valida sistema de logs, métricas em tempo real e diagnósticos automatizados.
+- **`test_multi_camera_fusion.py` (10 testes)**: Valida o motor de consenso e fusão multi-câmeras, escalonamento de quórum por quantidade de câmeras ($N=1$ a $4$), rejeição de falsos positivos unilaterais, alinhamento temporal, fusão de scores e a presença da análise completa de Yūko-Datotsu (Ki-Ken-Tai-Ichi) para golpes Ippon e não-Ippon.
+- **`test_pipeline_cancellation.py` (6 testes)**: Valida cancelamento cooperativo, liberação de recursos de streaming e cronômetro em tempo real.
+- **`test_pose_batch_processing.py` (4 testes)**: Valida processamento de poses em lotes paralelos com aceleração.
+- **`test_scoreboard_and_flag_detection.py` (8 testes)**: Valida o placar eletrônico Sanbon-shobu, detecção cromática de flag dorsal (Tasukuki) e inversão Aka ⇄ Shiro.
+- **`test_sonkyo_and_plane_filtering.py` (14 testes)**: Valida a classificação postural de Sonkyō, delimitação temporal da luta, filtragem de planos (fundo/transeuntes/árbitros em primeiro plano), debounce e NMS de 35 frames do `EventSpotter`, e persistência de aprendizado de Sonkyō.
+- **`test_stream_capture.py` (6 testes)**: Valida a captura assíncrona com threading, reconexão automática e otimizações de rede para câmeras IP / RTSP / Webcams.
+- **`test_training_modes.py` (8 testes)**: Valida as 14 modalidades pedagógicas de treino, cálculo dos 3 Pilares (Movimentação, Precisão, Constância) e perfil do Kendoca.
+- **`test_video_downloader.py` (12 testes)**: Valida download, extração de metadados, validação de URLs do YouTube/Web e integração de streams com cache.
 
-Total de **84 testes automatizados** executados e aprovados com 100% de sucesso.
+Total de **116 testes automatizados** executados e aprovados com 100% de sucesso.
 
 ---
 
@@ -384,7 +439,39 @@ Total de **84 testes automatizados** executados e aprovados com 100% de sucesso.
 
 ---
 
-### `[v1.9.1]` — 2026-09-02 *(Versão Atual)*
+### `[v2.0.0]` — 2026-09-08 *(Versão Atual)*
+
+- **Página Inicial de Boas-Vindas (Home) e Regra de Visibilidade Estrita ([app.py](file:///d:/Projetos/SenpAI/Dev/app.py))**:
+  - Implementada a tela de abertura padrão do sistema através da função `render_welcome_home_page()`, carregada automaticamente ao inicializar o SenpAI (`st.session_state["nav_page_selection"] = "home"`).
+  - **Regra de Visibilidade Estrita**: A página inicial **só é visível quando nem a página Análise de Lutas nem a página Menu de Configurações estiverem selecionadas**. A seleção de qualquer outra página oculta imediatamente a Home, garantindo foco total no fluxo selecionado.
+  - **Hero Banner Institucional**: Identificação visual estilizada *SenpAI • 先輩 AI*, selo de conformidade com os regulamentos da FIK (*International Kendo Federation*) e AJKF/ZNKR, e status em tempo real de hardware ativo (GPU NVIDIA CUDA com Tensor Cores FP16 / CPU).
+  - **Barra de Atalhos de Ação Rápida**: Botões de navegação direta para *Análise de Lutas*, *Menu de Configurações* e download do manual oficial (`manual.md`).
+  - **Guia Demonstrativo em 4 Passos (*Como Iniciar o Uso*)**:
+    1. *Navegação no Menu*: Orientações claras sobre o uso da barra lateral.
+    2. *Escolha do Modo*: Visão rápida dos modos Tempo Real, Detecção Gravada e Treinamento.
+    3. *Vídeo ou Câmera*: Instruções para upload, streaming web ou uso do botão *"Gerar Vídeo Demonstrativo"* para testar em 3 segundos.
+    4. *Diagnósticos & Exportação*: Interpretação do HUD, validação de *Ki-Ken-Tai-Ichi*, *Maai* e exportação de relatórios em Excel/JSON.
+  - **Cards Comparativos dos 3 Modos de Operação**: Apresentação detalhada do Modo em Tempo Real (multi-câmeras), Detecção Gravada (arbitragem oficial com rituais de Sonkyō) e Treinamento & Aprendizado (14 modalidades pedagógicas e 3 pilares).
+  - **Transparência de IA & Governança por Dan**: Explicação sobre a calibração preliminar realista (< 50%) e a governança com auditoria de árbitros (1º ao 8º Dan).
+- **Revisão da Acurácia Básica (< 50%) e Calibração Realista ([auto_trainer.py](file:///d:/Projetos/SenpAI/Dev/src/engine/auto_trainer.py))**:
+  - Redefinição transparente das baselines empíricas de fábrica para o intervalo de **32.0% a 46.5%** (*Suburi* 46.5%, *Ji-Geiko* 32.0%, *recorded_shiai* 34.0%, *realtime_shiai* 35.0%), refletindo a honestidade técnica do estado inicial de um modelo de visão computacional sem anotações de arbitragem.
+  - Integração com a precisão empírica real de Shinpans (`feedback_mgr.get_stats()["precision_pct"]`), que sobrepõe as baselines teóricas assim que anotações humanas forem registradas.
+  - Categorização visual por faixas de maturação: *Fase Inicial / Falsos Positivos* (< 45%), *Em Calibração* (45-65%), *Calibrado* (65-80%) e *Excelente / Shiai* (>= 80%).
+  - Sanitização e migração automática de bases de conhecimento legadas com valores inflados (`_sanitize_or_migrate_kb()`).
+- **Mitigação de Falsos Positivos, NMS Temporal e Discriminação de Contato (Maai) ([event_spotter.py](file:///d:/Projetos/SenpAI/Dev/src/analytics/event_spotter.py) & [pipeline.py](file:///d:/Projetos/SenpAI/Dev/src/pipeline.py))**:
+  - Solução para o problema prático de contagens irreais de golpes em Shiai (ex: 66 a 30 em lutas terminadas em 1 a 1).
+  - Cooldown de golpes (`min_event_gap_frames`) elevado de **15 para 35 frames (~1.2s)**.
+  - Implementação de **Non-Maximum Suppression (NMS) temporal** por atacante, descartando oscilações espúrias durante a elevação (*Furikaburi*) e descida do corte.
+  - **Discriminação de Contato / Maai**: Avaliação da proximidade física relativa entre Aka e Shiro no instante do impacto. Ataques desferidos sem proximidade de combate (> 0.48 de distância) são sumariamente reprovados como Ippon com diagnóstico explícito `Fora do Maai (Sem contato com oponente)`.
+  - Debounce entre adversários ajustado para 16 frames.
+- **Persistência Incremental e Consolidação de Checkpoints no Auto-Treinador ([auto_trainer.py](file:///d:/Projetos/SenpAI/Dev/src/engine/auto_trainer.py))**:
+  - O motor de auto-treinamento por IA consolida o aprendizado no início e ao término de cada sessão, retomando sempre do último checkpoint e acumulando sobre todo o conhecimento prévio, sem reiniciar do zero.
+- **Expansão da Suíte de Testes Automatizados (116 Testes)**:
+  - Suíte completa de **116 testes automatizados** em `unittest` executados e validados com 100% de sucesso.
+
+---
+
+### `[v1.9.1]` — 2026-09-02
 
 - **Contador de Pontos e Placar ao Vivo no Modo Realtime ([app.py](file:///d:/Projetos/SenpAI/Dev/app.py))**:
   - Inclusão do painel de **Contador de Pontos & Placar (Ippon ao Vivo)** posicionado no topo da lista de golpes no Modo de Detecção em Tempo Real.

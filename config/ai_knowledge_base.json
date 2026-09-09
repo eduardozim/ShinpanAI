@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-08-31T14:59:13.378866",
-  "total_web_sources_indexed": 45,
+  "last_updated": "2026-09-09T00:05:41.514539",
+  "total_web_sources_indexed": 14,
   "sources": {
     "fik_regulations": {
       "title": "FIK - The Regulations of Kendo Shiai and Shinpan (International Kendo Federation)",
@@ -75,6 +75,50 @@
         ],
         "stamina_retention_ratio_target": 0.88
       }
+    },
+    "ajkf_/_znkr_kendo_shinpan_&_shiai_practi": {
+      "title": "AJKF / ZNKR Kendo Shinpan & Shiai Practical Referee Handbook",
+      "type": "Manual de Arbitragem AJKF"
+    },
+    "treatise_on_nihon_kendo_kata_technical_&": {
+      "title": "Treatise on Nihon Kendo Kata Technical & Posture Standards",
+      "type": "Tratado Técnico Kata"
+    },
+    "fik_international_kendo_regulations_(art": {
+      "title": "FIK International Kendo Regulations (Artigos 12 a 24 - Yuko-Datotsu)",
+      "type": "Manual Oficial FIK"
+    },
+    "high-speed_motion_capture_of_fumikomi-as": {
+      "title": "High-Speed Motion Capture of Fumikomi-ashi & Left Heel Elevation Dynamics",
+      "type": "Mocap Científico"
+    },
+    "all_japan_kendo_championship_finals_-_ki": {
+      "title": "All Japan Kendo Championship Finals - Kinematic Video Corpus (60-120 FPS)",
+      "type": "Corpus de Vídeo HD"
+    },
+    "kirikaeshi_continuous_stroke_cadence_&_d": {
+      "title": "Kirikaeshi Continuous Stroke Cadence & Dynamic Posture Reference Bank",
+      "type": "Corpus de Vídeo Dojo"
+    },
+    "kendo_pedagogical_training_curriculum:_1": {
+      "title": "Kendo Pedagogical Training Curriculum: 14 Core Dojo Keiko Modalities",
+      "type": "Currículo Pedagógico"
+    },
+    "physiological_&_biomechanical_load_in_su": {
+      "title": "Physiological & Biomechanical Load in Suburi, Kirikaeshi & Kakari-geiko",
+      "type": "Estudo Biomecânico"
+    },
+    "reinforcement_optimization_on_dan_review": {
+      "title": "Reinforcement Optimization on Dan Review Feedback Dataset",
+      "type": "Dataset de Calibração"
+    },
+    "multi-view_neural_consensus_&_perspectiv": {
+      "title": "Multi-View Neural Consensus & Perspective Fusion for Martial Arts Scoring",
+      "type": "Modelo Neural"
+    },
+    "senpai_knowledge_base_&_calibration_prof": {
+      "title": "SenpAI Knowledge Base & Calibration Profiles Schema v1.6.0",
+      "type": "Base de Conhecimento"
     }
   },
   "learned_parameters": {
@@ -93,102 +137,144 @@
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "suburi": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "kihon": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "kirikaeshi": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "uchikomi_geiko": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "kakari_geiko": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "yakusoku_geiko": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "waza_geiko": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "oji_waza": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "ji_geiko": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "shiai_geiko": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "nihon_kendo_kata": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "bokuto_kihon_waza": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       },
       "shinsa": {
         "movement_weight": 0.35,
         "precision_weight": 0.35,
         "constancy_weight": 0.3,
-        "cadence_tolerance_pct": 0.15,
-        "posture_strictness": 0.8
+        "cadence_tolerance_pct": 0.12,
+        "posture_strictness": 0.85,
+        "current_accuracy": 97.7,
+        "last_calibrated": "09/09/2026 00:05",
+        "sessions_count": 3
       }
     }
   },
-  "training_sessions_completed": 8,
-  "last_retrained_at": "2026-08-31T14:59:13.378866"
+  "training_sessions_completed": 12,
+  "last_retrained_at": "2026-09-09T00:05:41.514539"
 }

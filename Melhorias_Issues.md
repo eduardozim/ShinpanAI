@@ -81,7 +81,7 @@ A versão final do **SenpAI** será organizada em **3 Nodos / Modos Principais d
 - **Modo de Alto Contraste e Daltonismo**: Garantir que a interface não dependa exclusivamente das cores Aka/Shiro.
 - **Tutorial Interativo**: Onboarding guiado apresentando os 3 modos e orientando a primeira análise.
 - **Perfis de Usuário**: Níveis de acesso diferenciados para Atleta, Instrutor, Árbitro, Pesquisador e Administrador.
-- **Salvamento Automático**: Preservar análises e revisões em tempo real contra perdas acidentais.
+- **Salvamento Automático & Tolerância a Falhas**: Preservar análises, revisões e treinamentos automáticos em tempo real contra perdas acidentais *(Implementado: Checkpoints periódicos atômicos, consolidação preventiva e salvamento de emergência no Treinamento Automático por IA)*.
 
 ### 10. Configurações Gerais do Sistema
 - **Calibração & Limiares**: Escolha e ajuste fino dos perfis de calibração e critérios técnicos.
@@ -178,13 +178,10 @@ O **SenpAI Mobile** foi concebido como uma extensão portátil e interativa do e
 - **Suporte a Smartwatch (Apple Watch / Wear OS)**: Leitura de dados de frequência cardíaca, impacto e aceleração do punho integrados à análise visual de *Ki-Ken-Tai-Ichi*.
 - **Diário de Bordo & Biometria do Kenshi**: Histórico consolidado de tempo de treino, calorias, fadiga e tempo de reação ao longo de semanas e meses.
 
+---
 
-
-
-
-
-
-
-
-
-
+## 🔬 Calibração de Precisão & Mitigação de Falsos Positivos (Concluído)
+- **Reformulação da Acurácia Básica (< 50%)**: Eliminação de valores iniciais inflados (75%-93%). O modelo cru sem treino agora assume baselines honestas de fábrica (32% a 46.5%), refletindo o estado preliminar com alto índice de falsos positivos até calibração pelo auto-treinamento e feedbacks.
+- **Priorização de Feedback Real**: Priorização da taxa real de acerto anotada pelos Shinpans (`precision_pct` do `FeedbackManager`) sobre estimativas teóricas quando houver dados reais.
+- **Supressão de Disparos Múltiplos (Debounce Temporal de Golpes)**: Elevação do `min_event_gap_frames` do `EventSpotter` de 15 para 35 frames (~1.2s a 30 FPS) e implementação de Non-Maximum Suppression (NMS) temporal, impedindo que oscilações na subida e descida da Shinai no mesmo ataque sejam fatiadas e detectadas como 2 ou 3 golpes.
+- **Discriminação de Contato Físico (Maai)**: Verificação de distância relativa entre os combatentes no instante do impacto. Golpes desferidos no ar a distâncias excessivas (> 0.48 de afastamento horizontal) são classificados como fora do Maai (sem contato) e descartados como Ippon, eliminando a inflação desmedida do placar em vídeos de Shiai.

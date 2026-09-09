@@ -53,7 +53,7 @@ class StrikeEvent:
         }
 
 class EventSpotter:
-    def __init__(self, velocity_threshold: float = 0.025, min_event_gap_frames: int = 15):
+    def __init__(self, velocity_threshold: float = 0.025, min_event_gap_frames: int = 35):
         self.velocity_threshold = velocity_threshold
         self.min_event_gap_frames = min_event_gap_frames
 
@@ -70,6 +70,7 @@ class EventSpotter:
         """
         Escaneia a história de poses frame a frame e retorna uma lista de StrikeEvents detectados.
         Se filter_out_of_bounds for True, descarta os golpes fora da janela delimitada pelo Sonkyō.
+        Possui cooldown estrito e supressão de duplicatas para evitar múltiplos disparos no mesmo golpe.
         """
         if len(pose_history) < 10:
             return []
@@ -158,10 +159,29 @@ class EventSpotter:
                 if not filter_out_of_bounds or is_within:
                     events.append(event)
 
-                # Pular os próximos frames para evitar duplicidade do mesmo golpe
+                # Pular os próximos frames para evitar duplicidade do mesmo golpe (~1.15s - 1.2s de cooldown)
                 i = peak_idx + self.min_event_gap_frames
             else:
                 i += 1
+
+        # 3. Supressão Temporal de Duplicatas (Non-Maximum Suppression)
+        # Garante que oscilações na subida/descida do mesmo ataque não gerem múltiplos golpes
+        if len(events) > 1:
+            filtered_events: List[StrikeEvent] = []
+            for ev in events:
+                if not filtered_events:
+                    filtered_events.append(ev)
+                    continue
+                prev_ev = filtered_events[-1]
+                # Se estiver dentro do gap temporal de debounce do mesmo atacante
+                if (ev.impact_frame - prev_ev.impact_frame) < self.min_event_gap_frames:
+                    v_curr = velocities[ev.impact_frame] if ev.impact_frame < len(velocities) else 0.0
+                    v_prev = velocities[prev_ev.impact_frame] if prev_ev.impact_frame < len(velocities) else 0.0
+                    if v_curr > v_prev:
+                        filtered_events[-1] = ev
+                else:
+                    filtered_events.append(ev)
+            events = filtered_events
 
         return events
 
